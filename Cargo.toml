@@ -1,0 +1,31 @@
+[package]
+name = "webhook-cli"
+version = "0.1.0"
+edition = "2024"
+description = "Command-line tool for webhook testing and monitoring"
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT"
+
+[[bin]]
+name = "webhook"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "^4.4", features = ["derive"] }
+tokio = { version = "^1.0", features = ["full"] }
+reqwest = { version = "^0.12", features = ["json"] }
+serde = { version = "^1.0", features = ["derive"] }
+serde_json = "^1.0"
+uuid = { version = "^1.0", features = ["v4"] }
+chrono = { version = "^0.4", features = ["serde"] }
+colored = "^3.0"
+indicatif = "^0.17"
+anyhow = "^1.0"
+url = "^2.4"
+
+[profile.release]
+opt-level = "z"     # Optimize for size
+lto = true          # Enable Link Time Optimization
+codegen-units = 1   # Reduce number of codegen units to increase optimizations
+panic = "abort"     # Abort on panic (reduces binary size)
+strip = true        # Remove symbols from binary
