@@ -210,7 +210,7 @@ async fn monitor_requests(
                 let filtered_requests: Vec<_> = requests
                     .into_iter()
                     .filter(|req| {
-                        method_filter.map_or(true, |method| {
+                        method_filter.is_none_or(|method| {
                             req.message_object.method.to_lowercase() == method.to_lowercase()
                         })
                     })
@@ -283,7 +283,7 @@ async fn show_logs(
     let filtered_requests: Vec<_> = requests
         .into_iter()
         .filter(|req| {
-            method_filter.map_or(true, |method| {
+            method_filter.is_none_or(|method| {
                 req.message_object.method.to_lowercase() == method.to_lowercase()
             })
         })
