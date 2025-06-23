@@ -65,6 +65,15 @@ webhook monitor --token YOUR_TOKEN --method POST
 
 # Custom refresh interval (default: 3 seconds)
 webhook monitor --token YOUR_TOKEN --interval 5
+
+# Show full request body with proper JSON formatting
+webhook monitor --token YOUR_TOKEN --full-body
+
+# Show request headers
+webhook monitor --token YOUR_TOKEN --show-headers
+
+# Combine multiple options
+webhook monitor --token YOUR_TOKEN --full-body --show-headers --method POST
 ```
 
 ### View Request Logs
@@ -77,6 +86,15 @@ webhook logs --token YOUR_TOKEN --count 100
 
 # Filter by method
 webhook logs --token YOUR_TOKEN --method GET
+
+# Show logs with full request bodies
+webhook logs --token YOUR_TOKEN --full-body
+
+# Show logs with headers
+webhook logs --token YOUR_TOKEN --show-headers
+
+# Combine options for detailed view
+webhook logs --token YOUR_TOKEN --full-body --show-headers
 ```
 
 ### Show Request Details
@@ -97,6 +115,8 @@ Monitors webhook requests in real-time.
 - `-c, --count <COUNT>` - Number of recent requests to show initially (default: 10)
 - `-i, --interval <INTERVAL>` - Refresh interval in seconds (default: 3)
 - `-m, --method <METHOD>` - Filter by HTTP method (GET, POST, PUT, DELETE, PATCH)
+- `--full-body` - Show full request body with proper formatting (JSON, form data, etc.)
+- `--show-headers` - Show request headers
 
 ### `webhook logs`
 Shows historical webhook requests.
@@ -105,6 +125,8 @@ Shows historical webhook requests.
 - `-t, --token <TOKEN>` - Webhook token (required)
 - `-c, --count <COUNT>` - Number of requests to fetch (default: 50)
 - `-m, --method <METHOD>` - Filter by HTTP method
+- `--full-body` - Show full request body with proper formatting
+- `--show-headers` - Show request headers
 
 ### `webhook show`
 Shows detailed information for a specific request.
@@ -120,11 +142,11 @@ Shows detailed information for a specific request.
 # 1. Generate a new token
 webhook generate
 
-# 2. Monitor requests (use token from step 1)
-webhook monitor --token abc123-def456-ghi789
+# 2. Monitor requests with full body and headers display (use token from step 1)
+webhook monitor --token abc123-def456-ghi789 --full-body --show-headers
 
-# 3. In another terminal, view logs
-webhook logs --token abc123-def456-ghi789
+# 3. In another terminal, view logs with full details
+webhook logs --token abc123-def456-ghi789 --full-body --show-headers
 
 # 4. Show details of a specific request
 webhook show --token abc123-def456-ghi789 --request-id req-12345
@@ -132,11 +154,11 @@ webhook show --token abc123-def456-ghi789 --request-id req-12345
 
 ### Development Workflow
 ```bash
-# Monitor only POST requests for your API
-webhook monitor --token YOUR_TOKEN --method POST --interval 1
+# Monitor only POST requests for your API with full details
+webhook monitor --token YOUR_TOKEN --method POST --interval 1 --full-body --show-headers
 
-# Check recent webhook activity
-webhook logs --token YOUR_TOKEN --count 20
+# Check recent webhook activity with formatted bodies and headers
+webhook logs --token YOUR_TOKEN --count 20 --full-body --show-headers
 ```
 
 ## Output Examples
@@ -148,12 +170,32 @@ Token: 123e4567-e89b-12d3-a456-426614174000
 Press Ctrl+C to quit
 ────────────────────────────────────────────────────────────────────────────────
 
-14:30:25 POST /api/notify (a1b2c3d4...) 📄 {"event": "payment.completed"}
-14:31:02 GET /webhook/status (e5f6g7h8...) 📄 (empty)
+14:30:25 POST /api/notify (a1b2c3d4-e5f6-7890-abcd-ef1234567890) 📄 {"event": "payment.completed"}
+📋 HEADERS
+  Content-Type: application/json
+  Authorization: Bearer token123
+  User-Agent: MyApp/1.0
+
+14:31:02 GET /webhook/status (e5f6g7h8-i9j0-1234-5678-90abcdef1234) 📄 (empty)
 
 🆕 NEW REQUEST
-14:31:45 POST /api/callback (i9j0k1l2...) 📄 {"user_id": 12345, "action": "login"}
-Body: {"user_id": 12345, "action": "login", "timestamp": "2024-01-15T14:31:45Z"}
+14:31:45 POST /api/callback (i9j0k1l2-m3n4-5678-9012-34567890abcd) 📄 {"user_id": 12345}
+
+📋 HEADERS
+  Content-Type: application/json
+  X-Signature: sha256=abc123...
+
+📄 REQUEST BODY
+──────────────────────────────
+{
+  "user_id": 12345,
+  "action": "login",
+  "timestamp": "2024-01-15T14:31:45Z",
+  "metadata": {
+    "ip": "192.168.1.1",
+    "user_agent": "MyApp/1.0"
+  }
+}
 ────────────────────────────────────────────────────────────────────────────────
 ```
 

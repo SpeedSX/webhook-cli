@@ -21,8 +21,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Generate a new webhook token
-    Generate,
-    /// Monitor webhook requests in real-time
+    Generate,    /// Monitor webhook requests in real-time
     Monitor {
         /// Webhook token (GUID)
         #[arg(short, long)]
@@ -36,8 +35,13 @@ enum Commands {
         /// Show only specific HTTP method
         #[arg(short, long)]
         method: Option<String>,
-    },
-    /// Show request logs for a token
+        /// Show full request body with proper formatting
+        #[arg(long)]
+        full_body: bool,
+        /// Show request headers
+        #[arg(long)]
+        show_headers: bool,
+    },    /// Show request logs for a token
     Logs {
         /// Webhook token (GUID)
         #[arg(short, long)]
@@ -48,6 +52,12 @@ enum Commands {
         /// Show only specific HTTP method
         #[arg(short, long)]
         method: Option<String>,
+        /// Show full request body with proper formatting
+        #[arg(long)]
+        full_body: bool,
+        /// Show request headers
+        #[arg(long)]
+        show_headers: bool,
     },
     /// Show details of a specific request
     Show {
@@ -148,7 +158,7 @@ async fn main() -> Result<()> {
             println!();
         }
 
-        Commands::Monitor { token, count, interval, method } => {
+        Commands::Monitor { token, count, interval, method, full_body, show_headers } => {
             let token = match token {
                 Some(t) => t,
                 None => {
@@ -162,11 +172,8 @@ async fn main() -> Result<()> {
                 }
             };
 
-            monitor_requests(&client, &token, count, interval, method.as_deref()).await?;
-        }
-
-        Commands::Logs { token, count, method } => {
-            show_logs(&client, &token, count, method.as_deref()).await?;
+            monitor_requests(&client, &token, count, interval, method.as_deref(), full_body, show_headers).await?;        }        Commands::Logs { token, count, method, full_body, show_headers } => {
+            show_logs(&client, &token, count, method.as_deref(), full_body, show_headers).await?;
         }
 
         Commands::Show { token, request_id } => {
@@ -183,6 +190,8 @@ async fn monitor_requests(
     initial_count: u32,
     interval: u64,
     method_filter: Option<&str>,
+    full_body: bool,
+    show_headers: bool,
 ) -> Result<()> {
     println!("{}", "🔍 Starting webhook monitor...".bright_green().bold());
     println!("Token: {}", token.bright_white());
@@ -205,16 +214,20 @@ async fn monitor_requests(
                             req.message_object.method.to_lowercase() == method.to_lowercase()
                         })
                     })
-                    .collect();
-
-                if first_run {
+                    .collect();                if first_run {
                     // Show existing requests on first run
                     if filtered_requests.is_empty() {
-                        println!("{}", "📭 No requests yet. Waiting for incoming webhooks...".bright_yellow());
-                    } else {
+                        println!("{}", "📭 No requests yet. Waiting for incoming webhooks...".bright_yellow());                    } else {
                         println!("{} {} recent requests:", "📜".bright_blue(), filtered_requests.len());
                         for request in &filtered_requests {
                             print_request_summary(request);
+                            if show_headers {
+                                print_request_headers(request);
+                            }
+                            if full_body {
+                                print_full_request_body(request);
+                                println!(); // Add spacing between requests when showing full body
+                            }
                             last_seen_ids.insert(request.id.clone());
                         }
                     }
@@ -224,12 +237,17 @@ async fn monitor_requests(
                     let new_requests: Vec<_> = filtered_requests
                         .into_iter()
                         .filter(|req| !last_seen_ids.contains(&req.id))
-                        .collect();
-
-                    for request in &new_requests {
+                        .collect();                    for request in &new_requests {
                         println!("{}", "🆕 NEW REQUEST".bright_green().bold());
                         print_request_summary(request);
-                        print_request_body(request);
+                        if show_headers {
+                            print_request_headers(request);
+                        }
+                        if full_body {
+                            print_full_request_body(request);
+                        } else {
+                            print_request_body(request);
+                        }
                         println!("{}", "─".repeat(80).bright_black());
                         last_seen_ids.insert(request.id.clone());
                     }
@@ -249,6 +267,8 @@ async fn show_logs(
     token: &str,
     count: u32,
     method_filter: Option<&str>,
+    full_body: bool,
+    show_headers: bool,
 ) -> Result<()> {
     println!("{}", "📜 Fetching webhook logs...".bright_blue().bold());
     
@@ -284,10 +304,15 @@ async fn show_logs(
         println!("Filtered by method: {}", method.to_uppercase().bright_cyan());
     }
     
-    println!("{}", "─".repeat(80).bright_black());
-
-    for request in &filtered_requests {
+    println!("{}", "─".repeat(80).bright_black());    for request in &filtered_requests {
         print_request_summary(request);
+        if show_headers {
+            print_request_headers(request);
+        }
+        if full_body {
+            print_full_request_body(request);
+            println!(); // Add spacing between requests when showing full body
+        }
     }
 
     println!();
@@ -369,14 +394,13 @@ fn print_request_summary(request: &WebhookRequest) {
     let time = format_date(&request.date);
     let method = format_method(&request.message_object.method);
     let path = extract_path(&request.message_object.value, &request.token_id);
-    let id_short = &request.id[..8];
-
+    
     println!(
         "{} {} {} {} {}",
         time.bright_black(),
         method,
         path.bright_white(),
-        format!("({}...)", id_short).bright_black(),
+        format!("({})", request.id).bright_black(),
         get_body_preview(&request.message_object.body).bright_yellow()
     );
 }
@@ -393,6 +417,63 @@ fn print_request_body(request: &WebhookRequest) {
             );
         }
     }
+}
+
+fn print_request_headers(request: &WebhookRequest) {
+    if !request.message_object.headers.is_empty() {
+        println!("{}", "📋 HEADERS".bright_cyan().bold());
+        for (key, values) in &request.message_object.headers {
+            for value in values {
+                println!("  {}: {}", key.bright_blue(), value.bright_white());
+            }
+        }
+    }
+}
+
+fn print_full_request_body(request: &WebhookRequest) {
+    println!("{}", "📄 REQUEST BODY".bright_cyan().bold());
+    println!("{}", "─".repeat(30).bright_black());
+    
+    if let Some(body) = &request.message_object.body {
+        if body.trim().is_empty() {
+            println!("{}", "(empty)".bright_black());
+        } else {
+            // Try to pretty-print JSON
+            match serde_json::from_str::<serde_json::Value>(body) {
+                Ok(json) => {
+                    println!("{}", serde_json::to_string_pretty(&json).unwrap().bright_white());
+                }
+                Err(_) => {
+                    // Not JSON, check if it's form data or other structured format
+                    if body.contains('&') && (body.contains('=') || body.starts_with("application/x-www-form-urlencoded")) {
+                        // Try to format form data nicely
+                        println!("{}", format_form_data(body).bright_white());
+                    } else {
+                        // Raw text with proper line breaks
+                        println!("{}", body.bright_white());
+                    }
+                }
+            }
+        }
+    } else {
+        println!("{}", "(no body)".bright_black());
+    }
+}
+
+fn format_form_data(data: &str) -> String {
+    data.split('&')
+        .map(|pair| {
+            if let Some((key, value)) = pair.split_once('=') {
+                format!("{}: {}", 
+                    urlencoding::decode(key).unwrap_or_else(|_| key.into()),
+                    urlencoding::decode(value).unwrap_or_else(|_| value.into())
+                )
+            } else {
+                pair.to_string()
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn format_method(method: &str) -> colored::ColoredString {
