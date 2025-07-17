@@ -214,10 +214,12 @@ async fn monitor_requests(
                             req.message_object.method.to_lowercase() == method.to_lowercase()
                         })
                     })
-                    .collect();                if first_run {
+                    .collect();
+                if first_run {
                     // Show existing requests on first run
                     if filtered_requests.is_empty() {
-                        println!("{}", "📭 No requests yet. Waiting for incoming webhooks...".bright_yellow());                    } else {
+                        println!("{}", "📭 No requests yet. Waiting for incoming webhooks...".bright_yellow());
+                    } else {
                         println!("{} {} recent requests:", "📜".bright_blue(), filtered_requests.len());
                         for request in &filtered_requests {
                             print_request_summary(request);
