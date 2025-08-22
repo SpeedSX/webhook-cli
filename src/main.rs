@@ -9,6 +9,9 @@ use std::collections::HashMap;
 use std::time::Duration;
 use uuid::Uuid;
 
+mod config;
+use config::Config;
+
 #[derive(Parser)]
 #[command(name = "webhook")]
 #[command(about = "A CLI tool for webhook testing and monitoring")]
@@ -106,10 +109,10 @@ struct WebhookClient {
 }
 
 impl WebhookClient {
-    fn new() -> Self {
+    fn new(config: &Config) -> Self {
         Self {
             client: Client::new(),
-            base_url: "https://webhooktest.emergemarket.dev".to_string(),
+            base_url: config.get_base_url().to_string(),
         }
     }
 
@@ -140,12 +143,13 @@ impl WebhookClient {
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
-    let client = WebhookClient::new();
+    let config = Config::load()?;
+    let client = WebhookClient::new(&config);
 
     match cli.command {
         Commands::Generate => {
             let token = Uuid::new_v4();
-            let webhook_url = format!("https://webhooktest.emergemarket.dev/{}", token);
+            let webhook_url = format!("{}/{}", config.get_base_url(), token);
             
             println!("{}", "🔑 New webhook token generated!".bright_green().bold());
             println!();
@@ -166,7 +170,7 @@ async fn main() -> Result<()> {
                     let new_token = Uuid::new_v4();
                     println!("{}", "🔑 No token provided, generated a new one:".bright_yellow());
                     println!("{}: {}", "Token".bright_blue().bold(), new_token.to_string().bright_white());
-                    println!("{}: https://webhooktest.emergemarket.dev/{}", "Webhook URL".bright_blue().bold(), new_token.to_string().bright_white());
+                    println!("{}: {}/{}", "Webhook URL".bright_blue().bold(), config.get_base_url(), new_token.to_string().bright_white());
                     println!();
                     new_token.to_string()
                 }

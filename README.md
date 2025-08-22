@@ -13,6 +13,41 @@ A fast, efficient command-line tool for webhook testing and monitoring built in 
 - 🎨 **Colorized Output**: Beautiful, readable colored terminal output
 - ⚡ **Low Resource Usage**: Minimal CPU and memory footprint
 
+## Configuration
+
+The tool uses configuration files to manage settings, including the webhook service URL. This allows you to keep internal URLs out of your source code repository.
+
+### Configuration Files
+
+1. **`config.toml`** - Default configuration template (safe to commit)
+2. **`config.local.toml`** - Local configuration with internal URLs (NOT committed to repository)
+
+### Setting Up Configuration
+
+1. **Copy the template:**
+   ```bash
+   cp config.toml config.local.toml
+   ```
+
+2. **Edit `config.local.toml` with your internal settings:**
+   ```toml
+   [webhook]
+   base_url = "https://your-internal-webhook-service.com"
+   default_count = 10
+   default_interval = 3
+   show_headers_by_default = false
+   show_full_body_by_default = false
+   ```
+
+3. **The `config.local.toml` file is automatically ignored by git**
+
+### Configuration Priority
+
+The tool loads configuration in this order:
+1. `config.local.toml` (highest priority)
+2. `config.toml` (fallback)
+3. Built-in defaults (if no config files exist)
+
 ## Installation
 
 ### Prerequisites
@@ -45,7 +80,7 @@ Output:
 🔑 New webhook token generated!
 
 Token: 123e4567-e89b-12d3-a456-426614174000
-Webhook URL: https://webhooktest.emergemarket.dev/123e4567-e89b-12d3-a456-426614174000
+Webhook URL: https://your-webhook-service.com/123e4567-e89b-12d3-a456-426614174000
 
 💡 Usage examples:
   webhook monitor --token 123e4567-e89b-12d3-a456-426614174000
@@ -251,6 +286,12 @@ User-Agent: MyApp/1.0
 - **Server Monitoring**: Lightweight webhook monitoring on servers
 - **Scripting**: Integrate webhook monitoring into shell scripts
 - **Remote Development**: SSH-friendly webhook testing
+
+## Security Notes
+
+- Never commit `config.local.toml` to version control
+- The `config.local.toml` file is automatically added to `.gitignore`
+- Use environment variables or secure configuration management for production deployments
 
 ## Contributing
 

@@ -1,0 +1,14 @@
+# Webhook CLI Configuration
+# Copy this file to config.local.toml and modify the values as needed
+
+[webhook]
+# Base URL for the webhook service
+base_url = "https://your-webhook-service.com"
+
+# Default settings
+default_count = 10
+default_interval = 3
+
+# Display settings
+show_headers_by_default = false
+show_full_body_by_default = false
