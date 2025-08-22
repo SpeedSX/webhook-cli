@@ -18,7 +18,7 @@ webhook logs --token YOUR_TOKEN --count 20
 ```bash
 # In your test script:
 TOKEN=$(webhook generate | grep "Token:" | cut -d' ' -f2)
-echo "Testing webhook: https://webhooktest.emergemarket.dev/$TOKEN"
+echo "Testing webhook: $TOKEN"
 
 # Run your tests that send webhooks...
 

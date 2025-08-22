@@ -21,6 +21,7 @@ chrono = { version = "^0.4", features = ["serde"] }
 colored = "^3.0"
 indicatif = "^0.18"
 anyhow = "^1.0"
+toml = "^0.8"
 url = "^2.4"
 urlencoding = "^2.1"
 syntect = "^5.0"
