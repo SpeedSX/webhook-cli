@@ -8,6 +8,10 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::Duration;
 use uuid::Uuid;
+use syntect::easy::HighlightLines;
+use syntect::highlighting::ThemeSet;
+use syntect::parsing::SyntaxSet;
+use syntect::util::{LinesWithEndings, as_24_bit_terminal_escaped};
 
 mod config;
 use config::Config;
@@ -471,77 +475,21 @@ fn print_full_request_body(request: &WebhookRequest) {
 }
 
 fn highlight_json(json: &str) {
-    let mut in_string = false;
-    let mut escape_next = false;
-    let mut indent_level: i32 = 0;
-    let mut i = 0;
+    let ps = SyntaxSet::load_defaults_newlines();
+    let ts = ThemeSet::load_defaults();
     
-    while i < json.len() {
-        let c = json.chars().nth(i).unwrap();
-        
-        if escape_next {
-            print!("{}", c.to_string().bright_white());
-            escape_next = false;
-        } else if c == '\\' {
-            print!("{}", c.to_string().bright_white());
-            escape_next = true;
-        } else if c == '"' {
-            if in_string {
-                print!("{}", c.to_string().bright_green());
-                in_string = false;
-            } else {
-                print!("{}", c.to_string().bright_green());
-                in_string = true;
-            }
-        } else if in_string {
-            print!("{}", c.to_string().bright_white());
-        } else {
-            match c {
-                '{' | '[' => {
-                    print!("{}", c.to_string().bright_blue().bold());
-                    indent_level += 1;
-                }
-                '}' | ']' => {
-                    indent_level = indent_level.saturating_sub(1);
-                    print!("{}", c.to_string().bright_blue().bold());
-                }
-                ':' => print!("{}", c.to_string().bright_yellow().bold()),
-                ',' => print!("{}", c.to_string().bright_cyan()),
-                ' ' | '\t' => print!("{}", c),
-                '\n' => {
-                    print!("{}", c);
-                    // Add proper indentation
-                    for _ in 0..indent_level {
-                        print!("  ");
-                    }
-                }
-                _ => {
-                    // Check if it's a number
-                    if c.is_ascii_digit() || c == '-' || c == '.' {
-                        print!("{}", c.to_string().bright_magenta());
-                    } else if c == 't' || c == 'f' || c == 'n' {
-                        // Handle true, false, null
-                        let remaining = &json[i..];
-                        if remaining.starts_with("true") {
-                            print!("{}", "true".bright_cyan().bold());
-                            i += 3;
-                        } else if remaining.starts_with("false") {
-                            print!("{}", "false".bright_cyan().bold());
-                            i += 4;
-                        } else if remaining.starts_with("null") {
-                            print!("{}", "null".bright_cyan().bold());
-                            i += 3;
-                        } else {
-                            print!("{}", c.to_string().bright_white());
-                        }
-                        continue;
-                    } else {
-                        print!("{}", c.to_string().bright_white());
-                    }
-                }
-            }
-        }
-        i += 1;
+    // Try to find JSON syntax, fallback to plain text if not found
+    let syntax = match ps.find_syntax_for_file("test.json") {
+        Ok(syntax) => syntax,
+        Err(_) => Some(ps.find_syntax_plain_text()),
+    };
+    
+    let mut h = HighlightLines::new(syntax.unwrap(), &ts.themes["base16-ocean.dark"]);
+    
+    for line in LinesWithEndings::from(json) {
+        let ranges: Vec<(syntect::highlighting::Style, &str)> = h.highlight_line(line, &ps).unwrap();
+        let escaped = as_24_bit_terminal_escaped(&ranges[..], false);
+        print!("{}", escaped);
     }
 }
 
