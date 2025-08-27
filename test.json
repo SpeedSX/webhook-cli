@@ -1,31 +1,22 @@
 {
-  "webhook": {
-    "id": "test-123",
-    "event": "user.created",
-    "timestamp": "2025-08-13T22:46:00Z",
-    "data": {
-      "user": {
-        "id": 12345,
-        "email": "test@example.com",
-        "name": "John Doe",
-        "active": true,
-        "roles": ["user", "admin"],
-        "metadata": {
-          "created_at": "2025-01-01T00:00:00Z",
-          "last_login": "2025-08-13T22:45:00Z"
-        }
-      },
-      "organization": {
-        "id": "org-456",
-        "name": "Test Corp",
-        "plan": "enterprise"
-      }
-    },
-    "headers": {
-      "Content-Type": "application/json",
-      "User-Agent": "WebhookUI-CLI/1.0",
-      "X-Webhook-Signature": "sha256=abc123..."
+  "string_value": "Hello, World!",
+  "number_value": 42,
+  "float_value": 3.14159,
+  "boolean_true": true,
+  "boolean_false": false,
+  "null_value": null,
+  "array_value": [1, 2, 3, "four", false],
+  "nested_object": {
+    "key1": "value1",
+    "key2": 123,
+    "deep_nesting": {
+      "level3": "deep value",
+      "numbers": [1, 2, 3, 4, 5]
     }
-  }
+  },
+  "escaped_string": "Line 1\nLine 2\tTabbed",
+  "empty_string": "",
+  "empty_array": [],
+  "empty_object": {}
 }
 

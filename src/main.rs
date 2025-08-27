@@ -379,10 +379,12 @@ async fn show_request_details(
         if body.trim().is_empty() {
             println!("{}", "(empty)".bright_black());
         } else {
-            // Try to pretty-print JSON
+            // Try to pretty-print JSON with syntax highlighting
             match serde_json::from_str::<serde_json::Value>(body) {
                 Ok(json) => {
-                    println!("{}", serde_json::to_string_pretty(&json).unwrap().bright_white());
+                    let pretty_json = serde_json::to_string_pretty(&json).unwrap();
+                    highlight_json(&pretty_json);
+                    println!(); // Add newline after the highlighted JSON
                 }
                 Err(_) => {
                     println!("{}", body.bright_white());
@@ -444,10 +446,12 @@ fn print_full_request_body(request: &WebhookRequest) {
         if body.trim().is_empty() {
             println!("{}", "(empty)".bright_black());
         } else {
-            // Try to pretty-print JSON
+            // Try to pretty-print JSON with syntax highlighting
             match serde_json::from_str::<serde_json::Value>(body) {
                 Ok(json) => {
-                    println!("{}", serde_json::to_string_pretty(&json).unwrap().bright_white());
+                    let pretty_json = serde_json::to_string_pretty(&json).unwrap();
+                    highlight_json(&pretty_json);
+                    println!(); // Add newline after the highlighted JSON
                 }
                 Err(_) => {
                     // Not JSON, check if it's form data or other structured format
@@ -463,6 +467,81 @@ fn print_full_request_body(request: &WebhookRequest) {
         }
     } else {
         println!("{}", "(no body)".bright_black());
+    }
+}
+
+fn highlight_json(json: &str) {
+    let mut in_string = false;
+    let mut escape_next = false;
+    let mut indent_level: i32 = 0;
+    let mut i = 0;
+    
+    while i < json.len() {
+        let c = json.chars().nth(i).unwrap();
+        
+        if escape_next {
+            print!("{}", c.to_string().bright_white());
+            escape_next = false;
+        } else if c == '\\' {
+            print!("{}", c.to_string().bright_white());
+            escape_next = true;
+        } else if c == '"' {
+            if in_string {
+                print!("{}", c.to_string().bright_green());
+                in_string = false;
+            } else {
+                print!("{}", c.to_string().bright_green());
+                in_string = true;
+            }
+        } else if in_string {
+            print!("{}", c.to_string().bright_white());
+        } else {
+            match c {
+                '{' | '[' => {
+                    print!("{}", c.to_string().bright_blue().bold());
+                    indent_level += 1;
+                }
+                '}' | ']' => {
+                    indent_level = indent_level.saturating_sub(1);
+                    print!("{}", c.to_string().bright_blue().bold());
+                }
+                ':' => print!("{}", c.to_string().bright_yellow().bold()),
+                ',' => print!("{}", c.to_string().bright_cyan()),
+                ' ' | '\t' => print!("{}", c),
+                '\n' => {
+                    print!("{}", c);
+                    // Add proper indentation
+                    for _ in 0..indent_level {
+                        print!("  ");
+                    }
+                }
+                _ => {
+                    // Check if it's a number
+                    if c.is_ascii_digit() || c == '-' || c == '.' {
+                        print!("{}", c.to_string().bright_magenta());
+                    } else if c == 't' || c == 'f' || c == 'n' {
+                        // Handle true, false, null
+                        let remaining = &json[i..];
+                        if remaining.starts_with("true") {
+                            print!("{}", "true".bright_cyan().bold());
+                            i += 3;
+                        } else if remaining.starts_with("false") {
+                            print!("{}", "false".bright_cyan().bold());
+                            i += 4;
+                        } else if remaining.starts_with("null") {
+                            print!("{}", "null".bright_cyan().bold());
+                            i += 3;
+                        } else {
+                            print!("{}", c.to_string().bright_white());
+                        }
+                        continue;
+                    } else {
+                        print!("{}", c.to_string().bright_white());
+                    }
+                }
+            }
+        }
+        i += 1;
     }
 }
 
