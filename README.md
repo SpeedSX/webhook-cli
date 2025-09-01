@@ -2,7 +2,7 @@
 
 A fast, efficient command-line tool for webhook testing and monitoring built in Rust.
 
-![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/:provider/:org/:repo)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/SpeedSX/webhook-cli)
 
 ## Features
 
