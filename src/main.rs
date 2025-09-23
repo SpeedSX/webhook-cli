@@ -489,13 +489,11 @@ fn highlight_json(json: &str) {
     let ps = SyntaxSet::load_defaults_newlines();
     let ts = ThemeSet::load_defaults();
     
-    // Try to find JSON syntax, fallback to plain text if not found
-    let syntax = match ps.find_syntax_for_file("test.json") {
-        Ok(syntax) => syntax,
-        Err(_) => Some(ps.find_syntax_plain_text()),
-    };
+    let syntax = ps.find_syntax_by_extension("json")
+        .or_else(|| ps.find_syntax_by_name("JSON"))
+        .unwrap_or_else(|| ps.find_syntax_plain_text());
     
-    let mut h = HighlightLines::new(syntax.unwrap(), &ts.themes["base16-ocean.dark"]);
+    let mut h = HighlightLines::new(syntax, &ts.themes["base16-ocean.dark"]);
     
     for line in LinesWithEndings::from(json) {
         let ranges: Vec<(syntect::highlighting::Style, &str)> = h.highlight_line(line, &ps).unwrap();
@@ -520,14 +518,15 @@ fn format_form_data(data: &str) -> String {
         .join("\n")
 }
 
-fn format_method(method: &str) -> String {
+
+fn format_method(method: &str) -> colored::ColoredString {
     match method.to_uppercase().as_str() {
-        "GET" => method.green().bold().to_string(),
-        "POST" => method.blue().bold().to_string(),
-        "PUT" => method.yellow().bold().to_string(),
-        "DELETE" => method.red().bold().to_string(),
-        "PATCH" => method.magenta().bold().to_string(),
-        _ => method.white().bold().to_string(),
+        "GET" => method.green().bold(),
+        "POST" => method.blue().bold(),
+        "PUT" => method.yellow().bold(),
+        "DELETE" => method.red().bold(),
+        "PATCH" => method.magenta().bold(),
+        _ => method.white().bold(),
     }
 }
 
