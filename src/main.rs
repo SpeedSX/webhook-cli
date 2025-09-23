@@ -553,12 +553,12 @@ fn extract_path(full_path: &str, token: &str) -> String {
 fn get_body_preview(body: &Option<String>) -> String {
     match body {
         Some(b) if !b.trim().is_empty() => {
-            if b.len() > 50 {
-                format!("[BODY] {}", &b[..47].trim())
-            } else {
-                format!("[BODY] {}", b.trim())
+            let trimmed = b.trim();
+            let mut preview: String = trimmed.chars().take(50).collect();
+            if trimmed.chars().count() > 50 {
+                preview.push('…');
             }
-        }
+            format!("[BODY] {}", preview)        }
         _ => "[BODY] (empty)".to_string(),
     }
 }
