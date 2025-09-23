@@ -21,7 +21,7 @@ mod color_control;
 #[derive(Parser)]
 #[command(name = "webhook")]
 #[command(about = "A CLI tool for webhook testing and monitoring")]
-#[command(version = "1.0")]
+#[command(version)]
 struct Cli {
     /// Disable colored output
     #[arg(long, global = true)]
@@ -156,8 +156,9 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
     
     // Initialize color control
-    color_control::init(cli.no_color);
-    
+    let no_color_env = std::env::var_os("NO_COLOR").is_some();
+    color_control::init(cli.no_color || no_color_env);
+
     let config = Config::load()?;
     let client = WebhookClient::new(&config);
 

@@ -3,8 +3,9 @@ use std::sync::OnceLock;
 static NO_COLOR: OnceLock<bool> = OnceLock::new();
 
 pub fn init(no_color: bool) {
-    NO_COLOR.set(no_color).unwrap_or({});
-    
+    // Ignore if already initialized; first value wins.
+    let _ = NO_COLOR.set(no_color);
+
     if no_color {
         colored::control::set_override(false);
     } else {
@@ -14,6 +15,11 @@ pub fn init(no_color: bool) {
         
         // On Unix systems, colored crate handles this automatically
     }
+}
+
+// Allow other modules to check whether colors should be emitted.
+pub fn is_color_enabled() -> bool {
+    !*NO_COLOR.get().unwrap_or(&false)
 }
 
 #[cfg(windows)]
