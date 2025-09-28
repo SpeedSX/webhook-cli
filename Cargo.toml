@@ -1,9 +1,9 @@
 [package]
 name = "webhook-cli"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2024"
 description = "Command-line tool for webhook testing and monitoring"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Oleksii Rodionov <arodionow@gmail.com>"]
 license = "MIT"
 
 [[bin]]
@@ -20,11 +20,12 @@ uuid = { version = "^1.0", features = ["v4"] }
 chrono = { version = "^0.4", features = ["serde"] }
 colored = "^3.0"
 indicatif = "^0.18"
+windows-sys = { version = "0.61.0", features = ["Win32_Foundation", "Win32_System_Console"] }
 anyhow = "^1.0"
-toml = "^0.8"
+toml = "^0.9"
 url = "^2.4"
 urlencoding = "^2.1"
-syntect = "^5.0"
+syntect = "^5"
 
 [profile.release]
 opt-level = "z"     # Optimize for size
