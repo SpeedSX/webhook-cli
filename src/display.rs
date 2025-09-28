@@ -25,15 +25,16 @@ pub fn print_request_summary(request: &WebhookRequest) {
 pub fn print_request_body(request: &WebhookRequest) {
     if let Some(body) = &request.message_object.body {
         if !body.trim().is_empty() {
+            let display_body = if body.chars().count() > 200 {
+                format!("{}...", body.chars().take(200).collect::<String>())
+            } else {
+                body.clone()
+            };
+            
             println!(
                 "{}: {}",
                 "Body".bright_blue().bold(),
-                if body.len() > 200 {
-                    format!("{}...", &body[..200])
-                } else {
-                    body.clone()
-                }
-                .bright_white()
+                display_body.bright_white()
             );
         }
     }
