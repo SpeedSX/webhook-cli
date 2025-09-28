@@ -12,7 +12,7 @@ pub fn init(no_color: bool) {
         // Enable ANSI support on Windows
         #[cfg(windows)]
         enable_ansi_support();
-        
+
         // On Unix systems, colored crate handles this automatically
     }
 }
@@ -26,10 +26,10 @@ pub fn is_color_enabled() -> bool {
 fn enable_ansi_support() {
     use windows_sys::Win32::Foundation::INVALID_HANDLE_VALUE;
     use windows_sys::Win32::System::Console::{
-        GetConsoleMode, SetConsoleMode, GetStdHandle, 
-        STD_OUTPUT_HANDLE, ENABLE_VIRTUAL_TERMINAL_PROCESSING
+        ENABLE_VIRTUAL_TERMINAL_PROCESSING, GetConsoleMode, GetStdHandle, STD_OUTPUT_HANDLE,
+        SetConsoleMode,
     };
-    
+
     unsafe {
         let stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
         if stdout_handle != INVALID_HANDLE_VALUE {
