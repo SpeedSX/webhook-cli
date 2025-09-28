@@ -263,24 +263,6 @@ User-Agent: MyApp/1.0
 }
 ```
 
-## Performance
-
-- **Memory Usage**: ~2-5 MB
-- **CPU Usage**: Minimal (polling-based)
-- **Network**: Efficient HTTP requests only when needed
-- **Startup Time**: <100ms
-
-## Comparison with Other Versions
-
-| Feature | Web UI | Desktop App | CLI Tool |
-|---------|--------|-------------|----------|
-| Resource Usage | Medium | Medium | **Minimal** |
-| Setup Required | Proxy Server | None | **None** |
-| Real-time Monitoring | ✅ | ✅ | ✅ |
-| Scriptable | ❌ | ❌ | **✅** |
-| Portable | ❌ | ✅ | **✅** |
-| Automation Friendly | ❌ | ❌ | **✅** |
-
 ## Use Cases
 
 - **CI/CD Pipelines**: Monitor webhooks during automated testing
@@ -294,14 +276,6 @@ User-Agent: MyApp/1.0
 - Never commit `config.local.toml` to version control
 - The `config.local.toml` file is automatically added to `.gitignore`
 - Use environment variables or secure configuration management for production deployments
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 
