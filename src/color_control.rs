@@ -17,11 +17,6 @@ pub fn init(no_color: bool) {
     }
 }
 
-// Allow other modules to check whether colors should be emitted.
-pub fn is_color_enabled() -> bool {
-    !*NO_COLOR.get().unwrap_or(&false)
-}
-
 #[cfg(windows)]
 fn enable_ansi_support() {
     use windows_sys::Win32::Foundation::INVALID_HANDLE_VALUE;

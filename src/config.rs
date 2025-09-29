@@ -56,12 +56,4 @@ impl Config {
     pub fn get_base_url(&self) -> &str {
         &self.webhook.base_url
     }
-
-    pub fn get_default_count(&self) -> u32 {
-        self.webhook.default_count
-    }
-
-    pub fn get_default_interval(&self) -> u64 {
-        self.webhook.default_interval
-    }
 }

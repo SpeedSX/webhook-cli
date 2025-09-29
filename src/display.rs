@@ -23,20 +23,20 @@ pub fn print_request_summary(request: &WebhookRequest) {
 }
 
 pub fn print_request_body(request: &WebhookRequest) {
-    if let Some(body) = &request.message_object.body {
-        if !body.trim().is_empty() {
-            let display_body = if body.chars().count() > 200 {
-                format!("{}...", body.chars().take(200).collect::<String>())
-            } else {
-                body.clone()
-            };
+    if let Some(body) = &request.message_object.body
+        && !body.trim().is_empty()
+    {
+        let display_body = if body.chars().count() > 200 {
+            format!("{}...", body.chars().take(200).collect::<String>())
+        } else {
+            body.clone()
+        };
 
-            println!(
-                "{}: {}",
-                "Body".bright_blue().bold(),
-                display_body.bright_white()
-            );
-        }
+        println!(
+            "{}: {}",
+            "Body".bright_blue().bold(),
+            display_body.bright_white()
+        );
     }
 }
 
