@@ -42,8 +42,8 @@ impl WebhookClient {
                 .await
                 .with_context(|| "Failed to read response body")?;
 
-            let requests: Vec<WebhookRequest> = serde_json::from_str(&response_text)
-                .with_context(|| {
+            let requests: Vec<WebhookRequest> =
+                serde_json::from_str(&response_text).with_context(|| {
                     format!(
                         "Failed to parse response as JSON. Response body: {}",
                         response_text
@@ -57,7 +57,7 @@ impl WebhookClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "(failed to read response body)".to_string());
-            
+
             anyhow::bail!(
                 "HTTP {} {}: {}",
                 status.as_u16(),

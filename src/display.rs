@@ -3,7 +3,7 @@ use colored::Colorize;
 use syntect::easy::HighlightLines;
 use syntect::highlighting::ThemeSet;
 use syntect::parsing::SyntaxSet;
-use syntect::util::{as_24_bit_terminal_escaped, LinesWithEndings};
+use syntect::util::{LinesWithEndings, as_24_bit_terminal_escaped};
 
 use crate::models::WebhookRequest;
 
@@ -30,7 +30,7 @@ pub fn print_request_body(request: &WebhookRequest) {
             } else {
                 body.clone()
             };
-            
+
             println!(
                 "{}: {}",
                 "Body".bright_blue().bold(),
