@@ -1,5 +1,6 @@
 # Webhook CLI
 [![Rust](https://github.com/SpeedSX/webhook-cli/actions/workflows/rust.yml/badge.svg)](https://github.com/SpeedSX/webhook-cli/actions/workflows/rust.yml)
+
 A fast, efficient command-line tool for webhook testing and monitoring built in Rust.
 
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/SpeedSX/webhook-cli)
