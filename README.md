@@ -1,19 +1,17 @@
 # Webhook CLI
-
+[![Rust](https://github.com/SpeedSX/webhook-cli/actions/workflows/rust.yml/badge.svg)](https://github.com/SpeedSX/webhook-cli/actions/workflows/rust.yml)
 A fast, efficient command-line tool for webhook testing and monitoring built in Rust.
 
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/SpeedSX/webhook-cli)
 
 ## Features
 
-- 🚀 **Fast & Efficient**: Built in Rust for maximum performance
-- 🔑 **Token Management**: Generate new webhook tokens instantly
-- 📊 **Real-time Monitoring**: Watch webhook requests as they arrive
-- 📜 **Request Logs**: View historical webhook requests
-- 🔍 **Detailed Inspection**: Show full request details including headers and body
-- 🎯 **Method Filtering**: Filter requests by HTTP method
-- 🎨 **Colorized Output**: Beautiful, readable colored terminal output
-- ⚡ **Low Resource Usage**: Minimal CPU and memory footprint
+- 🚀 **Fast & Efficient**: Built in Rust for maximum performance and minimal memory footprint
+- **Real-time Monitoring**: Watch webhook requests as they arrive
+- **Request Logs**: View historical webhook requests
+- **Detailed Inspection**: Show full request details including headers and body
+- **Method Filtering**: Filter requests by HTTP method
+- **Colorized Output**: Beautiful, readable colored terminal output
 
 ## Configuration
 
