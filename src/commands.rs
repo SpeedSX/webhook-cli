@@ -14,7 +14,7 @@ use crate::display::{
 
 pub async fn generate_token(config: &Config) -> Result<()> {
     let token = Uuid::new_v4();
-    let webhook_url = format!("{}/{}", config.get_base_url(), token);
+    let webhook_url = Config::join_url_segments(config.get_base_url(), &[&token.to_string()]);
 
     println!("{}", "New webhook token generated!".bright_green().bold());
     println!();

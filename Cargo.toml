@@ -20,7 +20,7 @@ uuid = { version = "^1.0", features = ["v4"] }
 chrono = { version = "^0.4", features = ["serde"] }
 colored = "^3.0"
 indicatif = "^0.18"
-windows-sys = { version = "0.61.0", features = ["Win32_Foundation", "Win32_System_Console"] }
+windows-sys = { version = "0.61.1", features = ["Win32_Foundation", "Win32_System_Console"] }
 anyhow = "^1.0"
 toml = "^0.9"
 url = "^2.4"
