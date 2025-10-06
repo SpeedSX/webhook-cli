@@ -67,7 +67,7 @@ pub async fn monitor_requests(
                     .into_iter()
                     .filter(|req| {
                         method_filter.is_none_or(|method| {
-                            req.message_object.method.to_lowercase() == method.to_lowercase()
+                            req.message_object.method.eq_ignore_ascii_case(method)
                         })
                     })
                     .collect();
@@ -159,7 +159,7 @@ pub async fn show_logs(
         .into_iter()
         .filter(|req| {
             method_filter.is_none_or(|method| {
-                req.message_object.method.to_lowercase() == method.to_lowercase()
+                req.message_object.method.eq_ignore_ascii_case(method)
             })
         })
         .collect();
