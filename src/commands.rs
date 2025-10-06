@@ -36,6 +36,7 @@ pub async fn generate_token(config: &Config) -> Result<()> {
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn monitor_requests(
     client: &WebhookClient,
     config: &Config,
