@@ -64,14 +64,14 @@ impl Config {
     pub fn join_url_segments(base: &str, segments: &[&str]) -> String {
         let normalized_base = Self::normalize_base_url(base);
         let mut url = normalized_base.to_string();
-        
+
         for segment in segments {
             if !segment.is_empty() {
                 url.push('/');
                 url.push_str(segment);
             }
         }
-        
+
         url
     }
 

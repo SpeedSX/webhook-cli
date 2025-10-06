@@ -7,7 +7,11 @@ use syntect::util::{LinesWithEndings, as_24_bit_terminal_escaped};
 
 use crate::models::WebhookRequest;
 
-pub fn print_request_summary(request: &WebhookRequest, show_body_preview: bool, body_preview_length: usize) {
+pub fn print_request_summary(
+    request: &WebhookRequest,
+    show_body_preview: bool,
+    body_preview_length: usize,
+) {
     let time = format_date(&request.date);
     let method = format_method(&request.message_object.method);
     let path = extract_path(&request.message_object.value, &request.token_id);

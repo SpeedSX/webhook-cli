@@ -87,7 +87,11 @@ pub async fn monitor_requests(
                         );
                         // Reverse the order so latest requests appear at the end
                         for request in filtered_requests.iter().rev() {
-                            print_request_summary(request, !full_body, config.get_body_preview_length()); // Don't show body preview in full body mode
+                            print_request_summary(
+                                request,
+                                !full_body,
+                                config.get_body_preview_length(),
+                            ); // Don't show body preview in full body mode
                             if show_headers {
                                 print_request_headers(request);
                             }
@@ -107,7 +111,11 @@ pub async fn monitor_requests(
                         .collect();
                     for request in &new_requests {
                         println!("{}", "NEW REQUEST".bright_green().bold());
-                        print_request_summary(request, !full_body, config.get_body_preview_length()); // Don't show body preview in full body mode
+                        print_request_summary(
+                            request,
+                            !full_body,
+                            config.get_body_preview_length(),
+                        ); // Don't show body preview in full body mode
                         if show_headers {
                             print_request_headers(request);
                         }
