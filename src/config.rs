@@ -15,6 +15,7 @@ pub struct WebhookConfig {
     pub default_interval: u64,
     pub show_headers_by_default: bool,
     pub show_full_body_by_default: bool,
+    pub body_preview_length: usize,
 }
 
 impl Config {
@@ -42,6 +43,7 @@ impl Config {
                 default_interval: 3,
                 show_headers_by_default: false,
                 show_full_body_by_default: false,
+                body_preview_length: 80,
             },
         };
 
@@ -75,5 +77,9 @@ impl Config {
 
     pub fn get_base_url(&self) -> &str {
         &self.webhook.base_url
+    }
+
+    pub fn get_body_preview_length(&self) -> usize {
+        self.webhook.body_preview_length
     }
 }
