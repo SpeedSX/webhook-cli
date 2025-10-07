@@ -24,7 +24,7 @@ impl WebhookClient {
     }
 
     pub async fn get_requests(&self, token: &str, count: u32) -> Result<Vec<WebhookRequest>> {
-        let url = format!("{}/{}/log/{}", self.base_url, token, count);
+        let url = Config::join_url_segments(&self.base_url, &[token, "log", &count.to_string()]);
 
         let response = self
             .client

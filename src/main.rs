@@ -67,6 +67,7 @@ async fn main() -> Result<()> {
 
             monitor_requests(
                 &client,
+                &config,
                 &token,
                 count,
                 interval,
@@ -85,6 +86,7 @@ async fn main() -> Result<()> {
         } => {
             show_logs(
                 &client,
+                &config,
                 &token,
                 count,
                 method.as_deref(),

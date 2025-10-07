@@ -15,6 +15,14 @@ pub struct WebhookConfig {
     pub default_interval: u64,
     pub show_headers_by_default: bool,
     pub show_full_body_by_default: bool,
+    #[serde(default = "WebhookConfig::default_body_preview_length")]
+    pub body_preview_length: usize,
+}
+
+impl WebhookConfig {
+    fn default_body_preview_length() -> usize {
+        80
+    }
 }
 
 impl Config {
@@ -42,6 +50,7 @@ impl Config {
                 default_interval: 3,
                 show_headers_by_default: false,
                 show_full_body_by_default: false,
+                body_preview_length: WebhookConfig::default_body_preview_length(),
             },
         };
 
@@ -53,7 +62,31 @@ impl Config {
         Ok(default_config)
     }
 
+    /// Normalize a base URL by removing trailing slash
+    fn normalize_base_url(url: &str) -> &str {
+        url.trim_end_matches('/')
+    }
+
+    /// Join URL segments properly without creating double slashes
+    pub fn join_url_segments(base: &str, segments: &[&str]) -> String {
+        let normalized_base = Self::normalize_base_url(base);
+        let mut url = normalized_base.to_string();
+
+        for segment in segments {
+            if !segment.is_empty() {
+                url.push('/');
+                url.push_str(segment);
+            }
+        }
+
+        url
+    }
+
     pub fn get_base_url(&self) -> &str {
         &self.webhook.base_url
+    }
+
+    pub fn get_body_preview_length(&self) -> usize {
+        self.webhook.body_preview_length
     }
 }

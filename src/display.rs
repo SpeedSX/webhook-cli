@@ -1,4 +1,4 @@
-use chrono::DateTime;
+use chrono::{DateTime, Local};
 use colored::Colorize;
 use syntect::easy::HighlightLines;
 use syntect::highlighting::ThemeSet;
@@ -7,35 +7,31 @@ use syntect::util::{LinesWithEndings, as_24_bit_terminal_escaped};
 
 use crate::models::WebhookRequest;
 
-pub fn print_request_summary(request: &WebhookRequest) {
+pub fn print_request_summary(
+    request: &WebhookRequest,
+    show_body_preview: bool,
+    body_preview_length: usize,
+) {
     let time = format_date(&request.date);
     let method = format_method(&request.message_object.method);
     let path = extract_path(&request.message_object.value, &request.token_id);
 
-    println!(
-        "{} {} {} {} {}",
-        time.bright_black(),
-        method,
-        path.bright_white(),
-        format!("({})", request.id).bright_black(),
-        get_body_preview(&request.message_object.body).bright_yellow()
-    );
-}
-
-pub fn print_request_body(request: &WebhookRequest) {
-    if let Some(body) = &request.message_object.body
-        && !body.trim().is_empty()
-    {
-        let display_body = if body.chars().count() > 200 {
-            format!("{}...", body.chars().take(200).collect::<String>())
-        } else {
-            body.clone()
-        };
-
+    if show_body_preview {
         println!(
-            "{}: {}",
-            "Body".bright_blue().bold(),
-            display_body.bright_white()
+            "{} {} {} {} {}",
+            time.bright_black(),
+            method,
+            path.bright_white(),
+            format!("({})", request.id).bright_black(),
+            get_body_preview(&request.message_object.body, body_preview_length).bright_white()
+        );
+    } else {
+        println!(
+            "{} {} {} {}",
+            time.bright_black(),
+            method,
+            path.bright_white(),
+            format!("({})", request.id).bright_black()
         );
     }
 }
@@ -201,7 +197,7 @@ pub fn format_form_data(data: &str) -> String {
 pub fn format_method(method: &str) -> colored::ColoredString {
     match method.to_uppercase().as_str() {
         "GET" => method.green().bold(),
-        "POST" => method.blue().bold(),
+        "POST" => method.bright_blue().bold(),
         "PUT" => method.yellow().bold(),
         "DELETE" => method.red().bold(),
         "PATCH" => method.magenta().bold(),
@@ -211,7 +207,11 @@ pub fn format_method(method: &str) -> colored::ColoredString {
 
 pub fn format_date(date_str: &str) -> String {
     match DateTime::parse_from_rfc3339(date_str) {
-        Ok(dt) => dt.format("%H:%M:%S").to_string(),
+        Ok(dt) => {
+            let utc_time = dt.format("%H:%M:%S UTC").to_string();
+            let local_time = dt.with_timezone(&Local).format("%H:%M:%S").to_string();
+            format!("{} ({})", local_time, utc_time)
+        }
         Err(_) => date_str.to_string(),
     }
 }
@@ -229,12 +229,12 @@ pub fn extract_path(full_path: &str, token: &str) -> String {
     }
 }
 
-pub fn get_body_preview(body: &Option<String>) -> String {
+pub fn get_body_preview(body: &Option<String>, max_length: usize) -> String {
     match body {
         Some(b) if !b.trim().is_empty() => {
             let trimmed = b.trim();
-            let mut preview: String = trimmed.chars().take(50).collect();
-            if trimmed.chars().count() > 50 {
+            let mut preview: String = trimmed.chars().take(max_length).collect();
+            if trimmed.chars().count() > max_length {
                 preview.push('…');
             }
             format!("[BODY] {}", preview)
