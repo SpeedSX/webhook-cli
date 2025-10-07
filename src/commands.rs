@@ -46,6 +46,7 @@ pub async fn monitor_requests(
     method_filter: Option<&str>,
     full_body: bool,
     show_headers: bool,
+    parse_paths: &[String],
 ) -> Result<()> {
     println!("{}", "Starting webhook monitor...".bright_green().bold());
     println!("Token: {}", token.bright_white());
@@ -96,8 +97,8 @@ pub async fn monitor_requests(
                             if show_headers {
                                 print_request_headers(request);
                             }
-                            if full_body {
-                                print_full_request_body(request);
+                            if full_body || !parse_paths.is_empty() {
+                                print_full_request_body(request, parse_paths, full_body);
                                 println!(); // Add spacing between requests when showing full body
                             }
                             last_seen_ids.insert(request.id.clone());
@@ -120,8 +121,8 @@ pub async fn monitor_requests(
                         if show_headers {
                             print_request_headers(request);
                         }
-                        if full_body {
-                            print_full_request_body(request);
+                        if full_body || !parse_paths.is_empty() {
+                            print_full_request_body(request, parse_paths, full_body);
                         }
                         println!("{}", "─".repeat(80).bright_black());
                         last_seen_ids.insert(request.id.clone());
@@ -137,6 +138,7 @@ pub async fn monitor_requests(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn show_logs(
     client: &WebhookClient,
     config: &Config,
@@ -145,6 +147,7 @@ pub async fn show_logs(
     method_filter: Option<&str>,
     full_body: bool,
     show_headers: bool,
+    parse_paths: &[String],
 ) -> Result<()> {
     println!("{}", "Fetching webhook logs...".bright_blue().bold());
 
@@ -190,8 +193,8 @@ pub async fn show_logs(
         if show_headers {
             print_request_headers(request);
         }
-        if full_body {
-            print_full_request_body(request);
+        if full_body || !parse_paths.is_empty() {
+            print_full_request_body(request, parse_paths, full_body);
             println!(); // Add spacing between requests when showing full body
         }
     }
@@ -209,6 +212,7 @@ pub async fn show_request_details(
     client: &WebhookClient,
     token: &str,
     request_id: &str,
+    parse_paths: &[String],
 ) -> Result<()> {
     println!("{}", "Fetching request details...".bright_blue().bold());
 
@@ -219,7 +223,7 @@ pub async fn show_request_details(
         .find(|req| req.id == request_id)
         .with_context(|| format!("Request with ID {} not found", request_id))?;
 
-    print_request_details(&request);
+    print_request_details(&request, parse_paths, true);
 
     Ok(())
 }

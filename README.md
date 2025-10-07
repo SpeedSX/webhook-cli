@@ -11,6 +11,7 @@ A fast, efficient command-line tool for webhook testing and monitoring built in 
 - **Request Logs**: View historical webhook requests
 - **Detailed Inspection**: Show full request details including headers and body
 - **Method Filtering**: Filter requests by HTTP method
+- **JSON Path Parsing**: Extract and display specific fields from JSON request bodies
 - **Colorized Output**: Beautiful, readable colored terminal output
 
 ## Configuration
@@ -107,6 +108,9 @@ webhook monitor --token YOUR_TOKEN --full-body
 # Show request headers
 webhook monitor --token YOUR_TOKEN --show-headers
 
+# Parse and display only specific JSON fields from request bodies
+webhook monitor --token YOUR_TOKEN --parse "/user/name" --parse "/data/id"
+
 # Combine multiple options
 webhook monitor --token YOUR_TOKEN --full-body --show-headers --method POST
 ```
@@ -128,6 +132,9 @@ webhook logs --token YOUR_TOKEN --full-body
 # Show logs with headers
 webhook logs --token YOUR_TOKEN --show-headers
 
+# Parse specific JSON fields from logged requests
+webhook logs --token YOUR_TOKEN --parse "/event/type" --parse "/user/email"
+
 # Combine options for detailed view
 webhook logs --token YOUR_TOKEN --full-body --show-headers
 ```
@@ -135,6 +142,9 @@ webhook logs --token YOUR_TOKEN --full-body --show-headers
 ### Show Request Details
 ```bash
 webhook show --token YOUR_TOKEN --request-id REQUEST_ID
+
+# Parse specific JSON fields from the request body
+webhook show --token YOUR_TOKEN --request-id REQUEST_ID --parse "/user/profile" --parse "/metadata/timestamp"
 ```
 
 ## Command Reference
@@ -152,6 +162,7 @@ Monitors webhook requests in real-time.
 - `-m, --method <METHOD>` - Filter by HTTP method (GET, POST, PUT, DELETE, PATCH)
 - `--full-body` - Show full request body with proper formatting (JSON, form data, etc.)
 - `--show-headers` - Show request headers
+- `--parse <PATH>` - Parse and display only specific JSON paths from the request body (e.g., "/user/name", "/data/items/0")
 
 ### `webhook logs`
 Shows historical webhook requests.
@@ -162,6 +173,7 @@ Shows historical webhook requests.
 - `-m, --method <METHOD>` - Filter by HTTP method
 - `--full-body` - Show full request body with proper formatting
 - `--show-headers` - Show request headers
+- `--parse <PATH>` - Parse and display only specific JSON paths from the request body (e.g., "/user/name", "/data/items/0")
 
 ### `webhook show`
 Shows detailed information for a specific request.
@@ -169,6 +181,7 @@ Shows detailed information for a specific request.
 **Options:**
 - `-t, --token <TOKEN>` - Webhook token (required)
 - `-r, --request-id <ID>` - Request ID to show details for (required)
+- `--parse <PATH>` - Parse and display only specific JSON paths from the request body (e.g., "/user/name", "/data/items/0")
 
 ## Examples
 
@@ -232,6 +245,19 @@ Press Ctrl+C to quit
   }
 }
 ────────────────────────────────────────────────────────────────────────────────
+```
+
+### Parsed JSON Fields
+When using `--parse` with JSON request bodies:
+```
+🧩 PARSED JSON FIELDS
+/user_id:
+12345
+
+/metadata/ip:
+"192.168.1.1"
+
+/nonexistent/path: null (path not found)
 ```
 
 ### Request Details
