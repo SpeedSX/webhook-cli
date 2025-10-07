@@ -47,42 +47,111 @@ pub fn print_request_headers(request: &WebhookRequest) {
     }
 }
 
-pub fn print_full_request_body(request: &WebhookRequest) {
-    println!("{}", "REQUEST BODY".bright_cyan().bold());
-    println!("{}", "─".repeat(30).bright_black());
-
+pub fn print_full_request_body(request: &WebhookRequest, parse_paths: &[String], full_body: bool) {
     if let Some(body) = &request.message_object.body {
         if body.trim().is_empty() {
-            println!("{}", "(empty)".bright_black());
+            if !parse_paths.is_empty() {
+                // When parsing is enabled but body is empty, show parsed fields section with empty message
+                println!("{}", "PARSED JSON FIELDS".bright_green().bold());
+                println!("{}", "(empty body)".bright_black());
+            } else {
+                // Original behavior with REQUEST BODY header
+                println!("{}", "REQUEST BODY".bright_cyan().bold());
+                println!("{}", "─".repeat(30).bright_black());
+                println!("{}", "(empty)".bright_black());
+            }
         } else {
-            // Try to pretty-print JSON with syntax highlighting
-            match serde_json::from_str::<serde_json::Value>(body) {
-                Ok(json) => {
-                    let pretty_json = serde_json::to_string_pretty(&json).unwrap();
-                    highlight_json(&pretty_json);
-                    println!(); // Add newline after the highlighted JSON
-                }
-                Err(_) => {
-                    // Not JSON, check if it's form data or other structured format
-                    if body.contains('&')
-                        && (body.contains('=')
-                            || body.starts_with("application/x-www-form-urlencoded"))
-                    {
-                        // Try to format form data nicely
-                        println!("{}", format_form_data(body).bright_white());
-                    } else {
-                        // Raw text with proper line breaks
+            // Body is not empty
+            if !parse_paths.is_empty() {
+                // Show parsed fields
+                match serde_json::from_str::<serde_json::Value>(body) {
+                    Ok(json) => {
+                        println!("{}", "PARSED JSON FIELDS".bright_green().bold());
+                        for path in parse_paths {
+                            match json.pointer(path) {
+                                Some(value) => {
+                                    println!("{}:", path.bright_blue());
+                                    let pretty_value = serde_json::to_string_pretty(value).unwrap();
+                                    highlight_json(&pretty_value);
+                                    println!();
+                                }
+                                None => {
+                                    println!(
+                                        "{}: {} (path not found)",
+                                        path.bright_blue(),
+                                        "null".bright_red()
+                                    );
+                                }
+                            }
+                        }
+
+                        // If full_body is also true, show the full body after parsed fields
+                        if full_body {
+                            println!("{}", "REQUEST BODY".bright_cyan().bold());
+                            println!("{}", "─".repeat(30).bright_black());
+                            let pretty_json = serde_json::to_string_pretty(&json).unwrap();
+                            highlight_json(&pretty_json);
+                            println!(); // Add newline after the highlighted JSON
+                        }
+                    }
+                    Err(_) => {
+                        println!(
+                            "{}",
+                            "Body is not valid JSON, cannot parse paths".bright_red()
+                        );
                         println!("{}", body.bright_white());
+
+                        // If full_body is also true, still show the body
+                        if full_body {
+                            println!("{}", "REQUEST BODY".bright_cyan().bold());
+                            println!("{}", "─".repeat(30).bright_black());
+                            println!("{}", body.bright_white());
+                        }
+                    }
+                }
+            } else {
+                // Original behavior with REQUEST BODY header
+                println!("{}", "REQUEST BODY".bright_cyan().bold());
+                println!("{}", "─".repeat(30).bright_black());
+
+                // Try to pretty-print JSON with syntax highlighting
+                match serde_json::from_str::<serde_json::Value>(body) {
+                    Ok(json) => {
+                        let pretty_json = serde_json::to_string_pretty(&json).unwrap();
+                        highlight_json(&pretty_json);
+                        println!(); // Add newline after the highlighted JSON
+                    }
+                    Err(_) => {
+                        // Not JSON, check if it's form data or other structured format
+                        if body.contains('&')
+                            && (body.contains('=')
+                                || body.starts_with("application/x-www-form-urlencoded"))
+                        {
+                            // Try to format form data nicely
+                            println!("{}", format_form_data(body).bright_white());
+                        } else {
+                            // Raw text with proper line breaks
+                            println!("{}", body.bright_white());
+                        }
                     }
                 }
             }
         }
     } else {
-        println!("{}", "(no body)".bright_black());
+        if !parse_paths.is_empty() {
+            // When parsing is enabled but no body, show parsed fields section with no body message
+            println!("{}", "PARSED JSON FIELDS".bright_green().bold());
+            println!("{}", "(no body)".bright_black());
+        } else {
+            // Original behavior with REQUEST BODY header
+            println!("{}", "REQUEST BODY".bright_cyan().bold());
+            println!("{}", "─".repeat(30).bright_black());
+            println!("{}", "(no body)".bright_black());
+        }
     }
 }
 
-pub fn print_request_details(request: &WebhookRequest) {
+pub fn print_request_details(request: &WebhookRequest, parse_paths: &[String], _full_body: bool) {
     println!("{}", "REQUEST DETAILS".bright_green().bold());
     println!("{}", "═".repeat(50).bright_black());
 
@@ -135,26 +204,65 @@ pub fn print_request_details(request: &WebhookRequest) {
     }
 
     // Body
-    println!("{}", "REQUEST BODY".bright_cyan().bold());
-    println!("{}", "─".repeat(30).bright_black());
-    if let Some(body) = &request.message_object.body {
-        if body.trim().is_empty() {
-            println!("{}", "(empty)".bright_black());
-        } else {
-            // Try to pretty-print JSON with syntax highlighting
-            match serde_json::from_str::<serde_json::Value>(body) {
-                Ok(json) => {
-                    let pretty_json = serde_json::to_string_pretty(&json).unwrap();
-                    highlight_json(&pretty_json);
-                    println!(); // Add newline after the highlighted JSON
-                }
-                Err(_) => {
-                    println!("{}", body.bright_white());
+    if !parse_paths.is_empty() {
+        // When parsing is enabled, skip the "REQUEST BODY" header
+        if let Some(body) = &request.message_object.body {
+            if !body.trim().is_empty() {
+                // Parse and display only specific JSON paths
+                match serde_json::from_str::<serde_json::Value>(body) {
+                    Ok(json) => {
+                        println!("{}", "PARSED JSON FIELDS".bright_green().bold());
+                        for path in parse_paths {
+                            match json.pointer(path) {
+                                Some(value) => {
+                                    println!("{}:", path.bright_blue());
+                                    let pretty_value = serde_json::to_string_pretty(value).unwrap();
+                                    highlight_json(&pretty_value);
+                                    println!();
+                                }
+                                None => {
+                                    println!(
+                                        "{}: {} (path not found)",
+                                        path.bright_blue(),
+                                        "null".bright_red()
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    Err(_) => {
+                        println!(
+                            "{}",
+                            "Body is not valid JSON, cannot parse paths".bright_red()
+                        );
+                        println!("{}", body.bright_white());
+                    }
                 }
             }
         }
     } else {
-        println!("{}", "(no body)".bright_black());
+        // Original behavior with REQUEST BODY header
+        println!("{}", "REQUEST BODY".bright_cyan().bold());
+        println!("{}", "─".repeat(30).bright_black());
+        if let Some(body) = &request.message_object.body {
+            if body.trim().is_empty() {
+                println!("{}", "(empty)".bright_black());
+            } else {
+                // Original behavior: Try to pretty-print JSON with syntax highlighting
+                match serde_json::from_str::<serde_json::Value>(body) {
+                    Ok(json) => {
+                        let pretty_json = serde_json::to_string_pretty(&json).unwrap();
+                        highlight_json(&pretty_json);
+                        println!(); // Add newline after the highlighted JSON
+                    }
+                    Err(_) => {
+                        println!("{}", body.bright_white());
+                    }
+                }
+            }
+        } else {
+            println!("{}", "(no body)".bright_black());
+        }
     }
 }
 

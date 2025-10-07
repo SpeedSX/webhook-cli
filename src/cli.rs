@@ -37,6 +37,9 @@ pub enum Commands {
         /// Show request headers
         #[arg(long)]
         show_headers: bool,
+        /// Parse and display only specific JSON paths from the request body (e.g., "/user/name", "/data/items/0")
+        #[arg(long, value_name = "PATH")]
+        parse: Vec<String>,
     },
     /// Show request logs for a token
     Logs {
@@ -55,6 +58,9 @@ pub enum Commands {
         /// Show request headers
         #[arg(long)]
         show_headers: bool,
+        /// Parse and display only specific JSON paths from the request body (e.g., "/user/name", "/data/items/0")
+        #[arg(long, value_name = "PATH")]
+        parse: Vec<String>,
     },
     /// Show details of a specific request
     Show {
@@ -64,5 +70,8 @@ pub enum Commands {
         /// Request ID to show details for
         #[arg(short, long)]
         request_id: String,
+        /// Parse and display only specific JSON paths from the request body (e.g., "/user/name", "/data/items/0")
+        #[arg(long, value_name = "PATH")]
+        parse: Vec<String>,
     },
 }

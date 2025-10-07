@@ -39,6 +39,7 @@ async fn main() -> Result<()> {
             method,
             full_body,
             show_headers,
+            parse,
         } => {
             let token = match token {
                 Some(t) => t,
@@ -74,6 +75,7 @@ async fn main() -> Result<()> {
                 method.as_deref(),
                 full_body,
                 show_headers,
+                &parse,
             )
             .await?;
         }
@@ -83,6 +85,7 @@ async fn main() -> Result<()> {
             method,
             full_body,
             show_headers,
+            parse,
         } => {
             show_logs(
                 &client,
@@ -92,12 +95,17 @@ async fn main() -> Result<()> {
                 method.as_deref(),
                 full_body,
                 show_headers,
+                &parse,
             )
             .await?;
         }
 
-        Commands::Show { token, request_id } => {
-            show_request_details(&client, &token, &request_id).await?;
+        Commands::Show {
+            token,
+            request_id,
+            parse,
+        } => {
+            show_request_details(&client, &token, &request_id, &parse).await?;
         }
     }
 
