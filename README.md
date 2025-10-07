@@ -250,8 +250,6 @@ Press Ctrl+C to quit
 ### Parsed JSON Fields
 When using `--parse` with JSON request bodies:
 ```
-📄 REQUEST BODY
-──────────────────────────────
 🧩 PARSED JSON FIELDS
 /user_id:
 12345

@@ -138,6 +138,7 @@ pub async fn monitor_requests(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn show_logs(
     client: &WebhookClient,
     config: &Config,

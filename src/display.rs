@@ -137,17 +137,15 @@ pub fn print_full_request_body(request: &WebhookRequest, parse_paths: &[String],
                 }
             }
         }
+    } else if !parse_paths.is_empty() {
+        // When parsing is enabled but no body, show parsed fields section with no body message
+        println!("{}", "PARSED JSON FIELDS".bright_green().bold());
+        println!("{}", "(no body)".bright_black());
     } else {
-        if !parse_paths.is_empty() {
-            // When parsing is enabled but no body, show parsed fields section with no body message
-            println!("{}", "PARSED JSON FIELDS".bright_green().bold());
-            println!("{}", "(no body)".bright_black());
-        } else {
-            // Original behavior with REQUEST BODY header
-            println!("{}", "REQUEST BODY".bright_cyan().bold());
-            println!("{}", "─".repeat(30).bright_black());
-            println!("{}", "(no body)".bright_black());
-        }
+        // Original behavior with REQUEST BODY header
+        println!("{}", "REQUEST BODY".bright_cyan().bold());
+        println!("{}", "─".repeat(30).bright_black());
+        println!("{}", "(no body)".bright_black());
     }
 }
 
@@ -204,51 +202,13 @@ pub fn print_request_details(request: &WebhookRequest, parse_paths: &[String], _
     }
 
     // Body
-    if !parse_paths.is_empty() {
-        // When parsing is enabled, skip the "REQUEST BODY" header
-        if let Some(body) = &request.message_object.body {
-            if !body.trim().is_empty() {
-                // Parse and display only specific JSON paths
-                match serde_json::from_str::<serde_json::Value>(body) {
-                    Ok(json) => {
-                        println!("{}", "PARSED JSON FIELDS".bright_green().bold());
-                        for path in parse_paths {
-                            match json.pointer(path) {
-                                Some(value) => {
-                                    println!("{}:", path.bright_blue());
-                                    let pretty_value = serde_json::to_string_pretty(value).unwrap();
-                                    highlight_json(&pretty_value);
-                                    println!();
-                                }
-                                None => {
-                                    println!(
-                                        "{}: {} (path not found)",
-                                        path.bright_blue(),
-                                        "null".bright_red()
-                                    );
-                                }
-                            }
-                        }
-                    }
-                    Err(_) => {
-                        println!(
-                            "{}",
-                            "Body is not valid JSON, cannot parse paths".bright_red()
-                        );
-                        println!("{}", body.bright_white());
-                    }
-                }
-            }
-        }
-    } else {
-        // Original behavior with REQUEST BODY header
+    if parse_paths.is_empty() {
         println!("{}", "REQUEST BODY".bright_cyan().bold());
         println!("{}", "─".repeat(30).bright_black());
         if let Some(body) = &request.message_object.body {
             if body.trim().is_empty() {
                 println!("{}", "(empty)".bright_black());
             } else {
-                // Original behavior: Try to pretty-print JSON with syntax highlighting
                 match serde_json::from_str::<serde_json::Value>(body) {
                     Ok(json) => {
                         let pretty_json = serde_json::to_string_pretty(&json).unwrap();
@@ -262,6 +222,39 @@ pub fn print_request_details(request: &WebhookRequest, parse_paths: &[String], _
             }
         } else {
             println!("{}", "(no body)".bright_black());
+        }
+    } else if let Some(body) = &request.message_object.body
+        && !body.trim().is_empty()
+    {
+        // Parse and display only specific JSON paths
+        match serde_json::from_str::<serde_json::Value>(body) {
+            Ok(json) => {
+                println!("{}", "PARSED JSON FIELDS".bright_green().bold());
+                for path in parse_paths {
+                    match json.pointer(path) {
+                        Some(value) => {
+                            println!("{}:", path.bright_blue());
+                            let pretty_value = serde_json::to_string_pretty(value).unwrap();
+                            highlight_json(&pretty_value);
+                            println!();
+                        }
+                        None => {
+                            println!(
+                                "{}: {} (path not found)",
+                                path.bright_blue(),
+                                "null".bright_red()
+                            );
+                        }
+                    }
+                }
+            }
+            Err(_) => {
+                println!(
+                    "{}",
+                    "Body is not valid JSON, cannot parse paths".bright_red()
+                );
+                println!("{}", body.bright_white());
+            }
         }
     }
 }
