@@ -23,7 +23,7 @@ pub fn print_request_summary(
             method,
             path.bright_white(),
             format!("({})", request.id).bright_black(),
-            get_body_preview(&request.message_object.body, body_preview_length).bright_white()
+            get_body_preview(&request.body, body_preview_length).bright_white()
         );
     } else {
         println!(
@@ -48,7 +48,7 @@ pub fn print_request_headers(request: &WebhookRequest) {
 }
 
 pub fn print_full_request_body(request: &WebhookRequest, parse_paths: &[String], full_body: bool) {
-    if let Some(body) = &request.message_object.body {
+    if let Some(body) = &request.body {
         if body.trim().is_empty() {
             if !parse_paths.is_empty() {
                 // When parsing is enabled but body is empty, show parsed fields section with empty message
@@ -205,7 +205,7 @@ pub fn print_request_details(request: &WebhookRequest, parse_paths: &[String], _
     if parse_paths.is_empty() {
         println!("{}", "REQUEST BODY".bright_cyan().bold());
         println!("{}", "─".repeat(30).bright_black());
-        if let Some(body) = &request.message_object.body {
+        if let Some(body) = &request.body {
             if body.trim().is_empty() {
                 println!("{}", "(empty)".bright_black());
             } else {
@@ -223,7 +223,7 @@ pub fn print_request_details(request: &WebhookRequest, parse_paths: &[String], _
         } else {
             println!("{}", "(no body)".bright_black());
         }
-    } else if let Some(body) = &request.message_object.body
+    } else if let Some(body) = &request.body
         && !body.trim().is_empty()
     {
         // Parse and display only specific JSON paths

@@ -13,6 +13,10 @@ pub struct WebhookRequest {
     pub message_object: MessageObject,
     #[serde(rename = "Message")]
     pub message: Option<String>,
+    #[serde(rename = "Body")]
+    pub body: Option<String>,
+    #[serde(rename = "BodyObject")]
+    pub body_object: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -25,8 +29,4 @@ pub struct MessageObject {
     pub headers: HashMap<String, Vec<String>>,
     #[serde(rename = "QueryParameters")]
     pub query_parameters: Vec<String>,
-    #[serde(rename = "Body")]
-    pub body: Option<String>,
-    #[serde(rename = "BodyObject")]
-    pub body_object: Option<serde_json::Value>,
 }
