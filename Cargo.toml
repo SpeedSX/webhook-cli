@@ -22,7 +22,7 @@ colored = "^3.0"
 indicatif = "^0.18"
 windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_System_Console"] }
 anyhow = "^1.0"
-toml = "^0.9"
+toml = "^1"
 url = "^2.4"
 urlencoding = "^2.1"
 syntect = "^5"
